@@ -37,7 +37,7 @@ object Parser:
 
   /**
    * A conjunction "&&" is a conjunction of bases.
-   * This matches first, so highest binary operator precedence.
+   * This matches last, so its precedence is highest.
    */
   private def conjunction[$: P]: P[Formula] =
     P( base.rep(1, sep = "&&") ).map{
@@ -47,7 +47,7 @@ object Parser:
 
   /**
    * A disjunction "||" is a disjunction of conjunctions.
-   * This matches second, so its precedence is after "&&".
+   * This matches second, so its precedence is next weakest.
    */
   private def disjunction[$: P]: P[Formula] =
     P( conjunction.rep(1, sep = "||") ).map{
@@ -57,7 +57,7 @@ object Parser:
 
   /**
    * An implication "->" is right-associative.
-   * This matches last, so it is the weakest precedence.
+   * This matches first, so it is the weakest precedence.
    */
   private def implication[$: P]: P[Formula] =
     P( disjunction ~ ( "->" ~/ implication ).? ).map{
@@ -78,4 +78,3 @@ object Parser:
       case Parsed.Success(value, _) => Right(value)
       case err: Parsed.Failure =>
         Left(s"Parse error: ${err.msg}\n${err.trace().longMsg}")
-  
